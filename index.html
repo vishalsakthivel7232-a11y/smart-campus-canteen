@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Campus Canteen</title>
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #fffaf3;
+  color: #302820;
+}
+header {
+  background: #176b4d;
+  color: white;
+  padding: 25px 15px;
+  text-align: center;
+}
+main {
+  max-width: 900px;
+  margin: 25px auto;
+  padding: 0 15px;
+}
+.menu {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+.card, .cart {
+  background: white;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px #00000010;
+}
+.food-icon { font-size: 42px; }
+.price { color: #176b4d; font-weight: bold; }
+button {
+  background: #176b4d;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.cart { margin-top: 25px; }
+.cart-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+}
+.remove { background: #b93838; }
+#message { color: #176b4d; font-weight: bold; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🍽️ Smart Campus Canteen</h1>
+  <p>Fresh food, easy ordering!</p>
+</header>
+
+<main>
+  <h2>Today's Menu</h2>
+  <section class="menu" id="menu"></section>
+
+  <section class="cart">
+    <h2>🛒 Your Cart</h2>
+    <div id="cartItems">Your cart is empty.</div>
+    <h3 id="total">Total: ₹0</h3>
+    <button id="checkout">Place Demo Order</button>
+    <p id="message"></p>
+    <small>College project demo. No real orders or payments.</small>
+  </section>
+</main>
+
+<script>
+const foods = [
+  { name: "Idli & Sambar", price: 35, emoji: "🍛" },
+  { name: "Masala Dosa", price: 50, emoji: "🥞" },
+  { name: "Veg Sandwich", price: 40, emoji: "🥪" },
+  { name: "Veg Fried Rice", price: 70, emoji: "🍚" },
+  { name: "Samosa", price: 20, emoji: "🥟" },
+  { name: "Fresh Juice", price: 30, emoji: "🧃" }
+];
+
+const cart = {};
+const menu = document.getElementById("menu");
+const cartItems = document.getElementById("cartItems");
+const total = document.getElementById("total");
+const message = document.getElementById("message");
+
+foods.forEach((food, id) => {
+  const card = document.createElement("article");
+  card.className = "card";
+
+  const icon = document.createElement("div");
+  icon.className = "food-icon";
+  icon.textContent = food.emoji;
+
+  const name = document.createElement("h3");
+  name.textContent = food.name;
+
+  const price = document.createElement("p");
+  price.className = "price";
+  price.textContent = "₹" + food.price;
+
+  const button = document.createElement("button");
+  button.textContent = "Add to Cart";
+  button.onclick = () => {
+    cart[id] = (cart[id] || 0) + 1;
+    message.textContent = "";
+    renderCart();
+  };
+
+  card.append(icon, name, price, button);
+  menu.appendChild(card);
+});
+
+function renderCart() {
+  cartItems.replaceChildren();
+  let sum = 0;
+  let count = 0;
+
+  foods.forEach((food, id) => {
+    const qty = cart[id] || 0;
+    if (!qty) return;
+
+    sum += food.price * qty;
+    count += qty;
+
+    const row = document.createElement("div");
+    row.className = "cart-row";
+
+    const label = document.createElement("span");
+    label.textContent =
+      `${food.name} × ${qty} — ₹${food.price * qty}`;
+
+    const remove = document.createElement("button");
+    remove.className = "remove";
+    remove.textContent = "Remove one";
+    remove.onclick = () => {
+      cart[id]--;
+      if (cart[id] === 0) delete cart[id];
+      renderCart();
+    };
+
+    row.append(label, remove);
+    cartItems.appendChild(row);
+  });
+
+  if (count === 0) {
+    cartItems.textContent = "Your cart is empty.";
+  }
+
+  total.textContent = "Total: ₹" + sum;
+}
+
+document.getElementById("checkout").onclick = () => {
+  const count = Object.values(cart).reduce((a, b) => a + b, 0);
+
+  if (!count) {
+    message.textContent = "Please add food to your cart first.";
+    return;
+  }
+
+  message.textContent =
+    "Demo order successful! Total: " + total.textContent;
+
+  Object.keys(cart).forEach(id => delete cart[id]);
+  renderCart();
+};
+
+renderCart();
+</script>
+</body>
+</html>
+
